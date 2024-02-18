@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\OtpController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +18,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('google')->stateless()->redirect();
+});
+
+Route::get('/auth/callback', function () {
+    $authUser = Socialite::driver('google')->stateless()->user();
+
+    $user = User::updateOrCreate(
+        ['google_auth_id' => $authUser->id],
+        ['name' => $authUser->name, 'email' => $authUser->email, 'avatar' => $authUser->avatar],
+    );
+
+    return ['user' => $user, 'token' => $authUser->token];
+});
+
+Route::middleware(['auth.google'])->group(function() {
+    Route::post('/generate-otp', [OtpController::class, 'generateOtp']);
+    Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
 });
