@@ -15,7 +15,7 @@ class OtpController extends Controller
         $otp = Otp::factory()->forUser($user->id)->create();
 
         return [
-            'otp' => $otp->code,
+            'code' => $otp->code,
             'expires_at' => $otp->expires_at,
         ];
     }
