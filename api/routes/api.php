@@ -30,7 +30,14 @@ Route::get('/auth/callback', function () {
         ['name' => $authUser->name, 'email' => $authUser->email, 'avatar' => $authUser->avatar],
     );
 
-   return redirect("http://localhost:3000?token=".  $authUser->token);
+    $dataJson = json_encode(
+        [
+            "user" => $user,
+            "token" => $authUser->token,
+        ]
+    );
+
+   return redirect("http://localhost:3000?data=".  base64_encode($dataJson));
 });
 
 Route::middleware(['auth.google'])->group(function() {
